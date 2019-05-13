@@ -41,12 +41,12 @@ public class ClassifierQuantizedMobileNet extends Classifier {
         // you can download this file from
         // see build.gradle for where to obtain this file. It should be auto
         // downloaded into assets.
-        return "mobilenet_quant_v1_224.tflite";
+        return "flowers.tflite";
     }
 
     @Override
     protected String getLabelPath() {
-        return "labels_mobilenet.txt";
+        return "flowers.txt";
     }
 
     @Override
@@ -61,6 +61,7 @@ public class ClassifierQuantizedMobileNet extends Classifier {
         imgData.put((byte) ((pixelValue >> 8) & 0xFF));
         imgData.put((byte) (pixelValue & 0xFF));
     }
+
 
     @Override
     protected float getProbability(int labelIndex) {
