@@ -24,6 +24,9 @@ import android.os.Trace;
 
 import com.raywenderlich.android.tflclassifier.classification.env.Logger;
 
+import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.gpu.GpuDelegate;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,77 +39,102 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
-import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.gpu.GpuDelegate;
 
-/** A classifier specialized to label images using TensorFlow Lite. */
+/**
+ * A classifier specialized to label images using TensorFlow Lite.
+ */
 public abstract class Classifier {
-    public static final String MODEL_PATH = "popguide_resized.tflite";
-    public static final String LABEL_PATH = "popguide_resized.txt";
+    public static final String MODEL_PATH = "exported_model.tflite";
+    public static final String LABEL_PATH = "exported_labels.txt";
 
     private static final Logger LOGGER = new Logger();
 
-    /** The model type used for classification. */
+    /**
+     * The model type used for classification.
+     */
     public enum Model {
         FLOAT,
         QUANTIZED,
     }
 
-    /** The runtime device type used for executing classification. */
+    /**
+     * The runtime device type used for executing classification.
+     */
     public enum Device {
         CPU,
         NNAPI,
         GPU
     }
 
-    /** Number of results to show in the UI. */
+    /**
+     * Number of results to show in the UI.
+     */
     private static final int MAX_RESULTS = 3;
 
-    /** Dimensions of inputs. */
+    /**
+     * Dimensions of inputs.
+     */
     private static final int DIM_BATCH_SIZE = 1;
 
     private static final int DIM_PIXEL_SIZE = 3;
 
-    /** Preallocated buffers for storing image data in. */
+    /**
+     * Preallocated buffers for storing image data in.
+     */
     private final int[] intValues = new int[getImageSizeX() * getImageSizeY()];
 
-    /** Options for configuring the Interpreter. */
+    /**
+     * Options for configuring the Interpreter.
+     */
     private final Interpreter.Options tfliteOptions = new Interpreter.Options();
 
-    /** The loaded TensorFlow Lite model. */
+    /**
+     * The loaded TensorFlow Lite model.
+     */
     private MappedByteBuffer tfliteModel;
 
-    /** Labels corresponding to the output of the vision model. */
+    /**
+     * Labels corresponding to the output of the vision model.
+     */
     private List<String> labels;
 
-    /** Optional GPU delegate for accleration. */
+    /**
+     * Optional GPU delegate for accleration.
+     */
     private GpuDelegate gpuDelegate = null;
 
-    /** An instance of the driver class to run model inference with Tensorflow Lite. */
+    /**
+     * An instance of the driver class to run model inference with Tensorflow Lite.
+     */
     protected Interpreter tflite;
 
-    /** A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs. */
+    /**
+     * A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs.
+     */
     protected ByteBuffer imgData = null;
 
     /**
      * Creates a classifier with the provided configuration.
      *
-     * @param activity The current Activity.
-     * @param model The model to use for classification.
-     * @param device The device to use for classification.
+     * @param activity   The current Activity.
+     * @param model      The model to use for classification.
+     * @param device     The device to use for classification.
      * @param numThreads The number of threads to use for classification.
      * @return A classifier with the desired configuration.
      */
     public static Classifier create(Activity activity, Model model, Device device, int numThreads)
             throws IOException {
-        if (model == Model.QUANTIZED) {
-            return new ClassifierQuantizedMobileNet(activity, device, numThreads);
-        } else {
-            return new ClassifierFloatMobileNet(activity, device, numThreads);
-        }
+//        if (model == Model.QUANTIZED) {
+//            return new ClassifierQuantizedMobileNet(activity, device, numThreads);
+//        } else {
+//        AS OUR MODEL  is not QUANTIZED use only
+        return new ClassifierFloatMobileNet(activity, device, numThreads);
+//        }
     }
 
-    /** An immutable result returned by a Classifier describing what was recognized. */
+    /**
+     * An immutable result returned by a Classifier describing what was recognized.
+     */
     public static class Recognition {
         /**
          * A unique identifier for what has been recognized. Specific to the class, not the instance of
@@ -114,7 +142,9 @@ public abstract class Classifier {
          */
         private final String id;
 
-        /** Display name for the recognition. */
+        /**
+         * Display name for the recognition.
+         */
         private final String title;
 
         /**
@@ -122,7 +152,9 @@ public abstract class Classifier {
          */
         private final Float confidence;
 
-        /** Optional location within the source image for the location of the recognized object. */
+        /**
+         * Optional location within the source image for the location of the recognized object.
+         */
         private RectF location;
 
         public Recognition(
@@ -176,7 +208,9 @@ public abstract class Classifier {
         }
     }
 
-    /** Initializes a {@code Classifier}. */
+    /**
+     * Initializes a {@code Classifier}.
+     */
     protected Classifier(Activity activity, Device device, int numThreads) throws IOException {
         tfliteModel = loadModelFile(activity);
         switch (device) {
@@ -204,7 +238,9 @@ public abstract class Classifier {
         LOGGER.d("Created a Tensorflow Lite Image Classifier.");
     }
 
-    /** Reads label list from Assets. */
+    /**
+     * Reads label list from Assets.
+     */
     private List<String> loadLabelList(Activity activity) throws IOException {
         List<String> labels = new ArrayList<String>();
         BufferedReader reader =
@@ -217,7 +253,9 @@ public abstract class Classifier {
         return labels;
     }
 
-    /** Memory-map the model file in Assets. */
+    /**
+     * Memory-map the model file in Assets.
+     */
     private MappedByteBuffer loadModelFile(Activity activity) throws IOException {
         AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(getModelPath());
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
@@ -227,7 +265,9 @@ public abstract class Classifier {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
-    /** Writes Image data into a {@code ByteBuffer}. */
+    /**
+     * Writes Image data into a {@code ByteBuffer}.
+     */
     private void convertBitmapToByteBuffer(Bitmap bitmap) {
         if (imgData == null) {
             return;
@@ -247,7 +287,9 @@ public abstract class Classifier {
         LOGGER.v("Timecost to put values into ByteBuffer: " + (endTime - startTime));
     }
 
-    /** Runs inference and returns the classification results. */
+    /**
+     * Runs inference and returns the classification results.
+     */
     public List<Recognition> recognizeImage(final Bitmap bitmap) {
         // Log this method so that it can be analyzed with systrace.
         Trace.beginSection("recognizeImage");
@@ -292,7 +334,9 @@ public abstract class Classifier {
         return recognitions;
     }
 
-    /** Closes the interpreter and model to release resources. */
+    /**
+     * Closes the interpreter and model to release resources.
+     */
     public void close() {
         if (tflite != null) {
             tflite.close();

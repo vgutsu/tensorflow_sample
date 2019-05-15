@@ -28,12 +28,12 @@ public class ClassifierFloatMobileNet extends Classifier {
 
     @Override
     public int getImageSizeX() {
-        return 224;
+        return 299;
     }
 
     @Override
     public int getImageSizeY() {
-        return 224;
+        return 299;
     }
 
     @Override
