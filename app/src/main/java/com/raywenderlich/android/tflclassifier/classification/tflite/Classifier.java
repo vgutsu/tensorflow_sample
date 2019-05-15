@@ -41,8 +41,8 @@ import org.tensorflow.lite.gpu.GpuDelegate;
 
 /** A classifier specialized to label images using TensorFlow Lite. */
 public abstract class Classifier {
-    public static final String MODEL_PATH = "flowers.tflite";
-    public static final String LABEL_PATH = "flowers.txt";
+    public static final String MODEL_PATH = "popguide_resized.tflite";
+    public static final String LABEL_PATH = "popguide_resized.txt";
 
     private static final Logger LOGGER = new Logger();
 
