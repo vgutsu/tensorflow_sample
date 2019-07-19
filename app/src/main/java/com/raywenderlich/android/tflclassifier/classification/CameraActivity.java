@@ -34,22 +34,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
-import android.support.annotation.NonNull;
-import android.support.annotation.UiThread;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.UiThread;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.raywenderlich.android.tflclassifier.R;
 import com.raywenderlich.android.tflclassifier.classification.env.ImageUtils;
@@ -82,29 +76,29 @@ public abstract class CameraActivity extends AppCompatActivity
     private int yRowStride;
     private Runnable postInferenceCallback;
     private Runnable imageConverter;
-    private LinearLayout bottomSheetLayout;
-    private LinearLayout gestureLayout;
-    private BottomSheetBehavior sheetBehavior;
-    protected TextView recognitionTextView,
-            recognition1TextView,
-            recognition2TextView,
-            recognitionValueTextView,
-            recognition1ValueTextView,
-            recognition2ValueTextView;
-    protected TextView frameValueTextView,
-            cropValueTextView,
-            cameraResolutionTextView,
-            rotationTextView,
-            inferenceTimeTextView;
-    protected ImageView bottomSheetArrowImageView;
-    private ImageView plusImageView, minusImageView;
-    private Spinner modelSpinner;
-    private Spinner deviceSpinner;
-    private TextView threadsTextView;
+    //    private LinearLayout bottomSheetLayout;
+//    private LinearLayout gestureLayout;
+//    private BottomSheetBehavior sheetBehavior;
+    protected TextView recognized;
+//            recognition1TextView,
+//            recognition2TextView,
+//            recognitionValueTextView,
+//            recognition1ValueTextView,
+//            recognition2ValueTextView;
+//    protected TextView frameValueTextView,
+//            cropValueTextView,
+//            cameraResolutionTextView,
+//            rotationTextView,
+//            inferenceTimeTextView;
+//    protected ImageView bottomSheetArrowImageView;
+//    private ImageView plusImageView, minusImageView;
+//    private Spinner modelSpinner;
+//    private Spinner deviceSpinner;
+//    private TextView threadsTextView;
 
-    private Model model = Model.QUANTIZED;
+    private Model model = Model.FLOAT;
     private Device device = Device.CPU;
-    private int numThreads = -1;
+    private int numThreads = 5;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -113,6 +107,7 @@ public abstract class CameraActivity extends AppCompatActivity
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.activity_camera);
+
 //        Toolbar toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 //        getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -122,85 +117,86 @@ public abstract class CameraActivity extends AppCompatActivity
         } else {
             requestPermission();
         }
+//
+//        threadsTextView = findViewById(R.id.threads);
+//        plusImageView = findViewById(R.id.plus);
+//        minusImageView = findViewById(R.id.minus);
+//        modelSpinner = findViewById(R.id.model_spinner);
+//        deviceSpinner = findViewById(R.id.device_spinner);
+//        bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
+//        gestureLayout = findViewById(R.id.gesture_layout);
+//        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+//        bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
+//
+//        ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
+//        vto.addOnGlobalLayoutListener(
+//                new ViewTreeObserver.OnGlobalLayoutListener() {
+//                    @Override
+//                    public void onGlobalLayout() {
+//                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+//                            gestureLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+//                        } else {
+//                            gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                        }
+//                        //                int width = bottomSheetLayout.getMeasuredWidth();
+//                        int height = gestureLayout.getMeasuredHeight();
+//
+//                        sheetBehavior.setPeekHeight(height);
+//                    }
+//                });
+//        sheetBehavior.setHideable(false);
+//
+//        sheetBehavior.setBottomSheetCallback(
+//                new BottomSheetBehavior.BottomSheetCallback() {
+//                    @Override
+//                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+//                        switch (newState) {
+//                            case BottomSheetBehavior.STATE_HIDDEN:
+//                                break;
+//                            case BottomSheetBehavior.STATE_EXPANDED: {
+//                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
+//                            }
+//                            break;
+//                            case BottomSheetBehavior.STATE_COLLAPSED: {
+//                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+//                            }
+//                            break;
+//                            case BottomSheetBehavior.STATE_DRAGGING:
+//                                break;
+//                            case BottomSheetBehavior.STATE_SETTLING:
+//                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+//                                break;
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+//                    }
+//                });
+//
+        recognized = findViewById(R.id.recognized);
+//        recognitionTextView = findViewById(R.id.detected_item);
+//        recognitionValueTextView = findViewById(R.id.detected_item_value);
+//        recognition1TextView = findViewById(R.id.detected_item1);
+//        recognition1ValueTextView = findViewById(R.id.detected_item1_value);
+//        recognition2TextView = findViewById(R.id.detected_item2);
+//        recognition2ValueTextView = findViewById(R.id.detected_item2_value);
+//
+//        frameValueTextView = findViewById(R.id.frame_info);
+//        cropValueTextView = findViewById(R.id.crop_info);
+//        cameraResolutionTextView = findViewById(R.id.view_info);
+//        rotationTextView = findViewById(R.id.rotation_info);
+//        inferenceTimeTextView = findViewById(R.id.inference_info);
+//
+//        modelSpinner.setOnItemSelectedListener(this);
+//        deviceSpinner.setOnItemSelectedListener(this);
+//
+//        plusImageView.setOnClickListener(this);
+//        minusImageView.setOnClickListener(this);
 
-        threadsTextView = findViewById(R.id.threads);
-        plusImageView = findViewById(R.id.plus);
-        minusImageView = findViewById(R.id.minus);
-        modelSpinner = findViewById(R.id.model_spinner);
-        deviceSpinner = findViewById(R.id.device_spinner);
-        bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
-        gestureLayout = findViewById(R.id.gesture_layout);
-        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-        bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
-
-        ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                            gestureLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                        } else {
-                            gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        }
-                        //                int width = bottomSheetLayout.getMeasuredWidth();
-                        int height = gestureLayout.getMeasuredHeight();
-
-                        sheetBehavior.setPeekHeight(height);
-                    }
-                });
-        sheetBehavior.setHideable(false);
-
-        sheetBehavior.setBottomSheetCallback(
-                new BottomSheetBehavior.BottomSheetCallback() {
-                    @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                        switch (newState) {
-                            case BottomSheetBehavior.STATE_HIDDEN:
-                                break;
-                            case BottomSheetBehavior.STATE_EXPANDED: {
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
-                            }
-                            break;
-                            case BottomSheetBehavior.STATE_COLLAPSED: {
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                            }
-                            break;
-                            case BottomSheetBehavior.STATE_DRAGGING:
-                                break;
-                            case BottomSheetBehavior.STATE_SETTLING:
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                                break;
-                        }
-                    }
-
-                    @Override
-                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                    }
-                });
-
-        recognitionTextView = findViewById(R.id.detected_item);
-        recognitionValueTextView = findViewById(R.id.detected_item_value);
-        recognition1TextView = findViewById(R.id.detected_item1);
-        recognition1ValueTextView = findViewById(R.id.detected_item1_value);
-        recognition2TextView = findViewById(R.id.detected_item2);
-        recognition2ValueTextView = findViewById(R.id.detected_item2_value);
-
-        frameValueTextView = findViewById(R.id.frame_info);
-        cropValueTextView = findViewById(R.id.crop_info);
-        cameraResolutionTextView = findViewById(R.id.view_info);
-        rotationTextView = findViewById(R.id.rotation_info);
-        inferenceTimeTextView = findViewById(R.id.inference_info);
-
-        modelSpinner.setOnItemSelectedListener(this);
-        deviceSpinner.setOnItemSelectedListener(this);
-
-        plusImageView.setOnClickListener(this);
-        minusImageView.setOnClickListener(this);
-
-        model = Model.valueOf(modelSpinner.getSelectedItem().toString().toUpperCase());
-        device = Device.valueOf(deviceSpinner.getSelectedItem().toString());
-        numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
+//        model = Model.valueOf(modelSpinner.getSelectedItem().toString().toUpperCase());
+//        device = Device.valueOf(deviceSpinner.getSelectedItem().toString());
+//        numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
     }
 
     protected int[] getRgbBytes() {
@@ -525,53 +521,34 @@ public abstract class CameraActivity extends AppCompatActivity
     @UiThread
     protected void showResultsInBottomSheet(List<Recognition> results) {
         if (results != null && results.size() >= 3) {
-            Recognition recognition = results.get(0);
-            if (recognition != null) {
-                if (recognition.getTitle() != null)
-                    recognitionTextView.setText(recognition.getTitle());
-                if (recognition.getConfidence() != null)
-                    recognitionValueTextView.setText(
-                            String.format("%.2f", (100 * recognition.getConfidence())) + "%");
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Recognition recognition : results) {
+                if (recognition != null) {
+                    if (recognition.getTitle() != null)
+                        stringBuilder.append(recognition.getTitle());
+                    if (recognition.getConfidence() != null) {
+                        stringBuilder.append(String.format(": %.2f", 100 * recognition.getConfidence()) + "%");
+                        stringBuilder.append("\n");
+                    }
+                }
             }
-
-            Recognition recognition1 = results.get(1);
-            if (recognition1 != null) {
-                if (recognition1.getTitle() != null)
-                    recognition1TextView.setText(recognition1.getTitle());
-                if (recognition1.getConfidence() != null)
-                    recognition1ValueTextView.setText(
-                            String.format("%.2f", (100 * recognition1.getConfidence())) + "%");
-            }
-
-            Recognition recognition2 = results.get(2);
-            if (recognition2 != null) {
-                if (recognition2.getTitle() != null)
-                    recognition2TextView.setText(recognition2.getTitle());
-                if (recognition2.getConfidence() != null)
-                    recognition2ValueTextView.setText(
-                            String.format("%.2f", (100 * recognition2.getConfidence())) + "%");
-            }
+            recognized.setText(stringBuilder.toString());
         }
     }
 
     protected void showFrameInfo(String frameInfo) {
-        frameValueTextView.setText(frameInfo);
     }
 
     protected void showCropInfo(String cropInfo) {
-        cropValueTextView.setText(cropInfo);
     }
 
     protected void showCameraResolution(String cameraInfo) {
-        cameraResolutionTextView.setText(previewWidth + "x" + previewHeight);
     }
 
     protected void showRotationInfo(String rotation) {
-        rotationTextView.setText(rotation);
     }
 
     protected void showInference(String inferenceTime) {
-        inferenceTimeTextView.setText(inferenceTime);
     }
 
     protected Model getModel() {
@@ -595,9 +572,6 @@ public abstract class CameraActivity extends AppCompatActivity
             LOGGER.d("Updating  device: " + device);
             this.device = device;
             final boolean threadsEnabled = device == Device.CPU;
-            plusImageView.setEnabled(threadsEnabled);
-            minusImageView.setEnabled(threadsEnabled);
-            threadsTextView.setText(threadsEnabled ? String.valueOf(numThreads) : "N/A");
             onInferenceConfigurationChanged();
         }
     }
@@ -626,30 +600,30 @@ public abstract class CameraActivity extends AppCompatActivity
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.plus) {
-            String threads = threadsTextView.getText().toString().trim();
-            int numThreads = Integer.parseInt(threads);
-            if (numThreads >= 9) return;
-            setNumThreads(++numThreads);
-            threadsTextView.setText(String.valueOf(numThreads));
-        } else if (v.getId() == R.id.minus) {
-            String threads = threadsTextView.getText().toString().trim();
-            int numThreads = Integer.parseInt(threads);
-            if (numThreads == 1) {
-                return;
-            }
-            setNumThreads(--numThreads);
-            threadsTextView.setText(String.valueOf(numThreads));
-        }
+//        if (v.getId() == R.id.plus) {
+//            String threads = threadsTextView.getText().toString().trim();
+//            int numThreads = Integer.parseInt(threads);
+//            if (numThreads >= 9) return;
+//            setNumThreads(++numThreads);
+//            threadsTextView.setText(String.valueOf(numThreads));
+//        } else if (v.getId() == R.id.minus) {
+//            String threads = threadsTextView.getText().toString().trim();
+//            int numThreads = Integer.parseInt(threads);
+//            if (numThreads == 1) {
+//                return;
+//            }
+//            setNumThreads(--numThreads);
+//            threadsTextView.setText(String.valueOf(numThreads));
+//        }
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        if (parent == modelSpinner) {
-            setModel(Model.valueOf(parent.getItemAtPosition(pos).toString().toUpperCase()));
-        } else if (parent == deviceSpinner) {
-            setDevice(Device.valueOf(parent.getItemAtPosition(pos).toString()));
-        }
+//        if (parent == modelSpinner) {
+//            setModel(Model.valueOf(parent.getItemAtPosition(pos).toString().toUpperCase()));
+//        } else if (parent == deviceSpinner) {
+//            setDevice(Device.valueOf(parent.getItemAtPosition(pos).toString()));
+//        }
     }
 
     @Override

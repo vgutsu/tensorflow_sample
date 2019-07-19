@@ -21,7 +21,9 @@ import com.raywenderlich.android.tflclassifier.classification.tflite.Classifier.
 import java.io.IOException;
 import java.util.List;
 
-import static com.raywenderlich.android.tflclassifier.classification.tflite.Classifier.*;
+import static com.raywenderlich.android.tflclassifier.classification.tflite.Classifier.Model;
+import static com.raywenderlich.android.tflclassifier.classification.tflite.Classifier.Recognition;
+import static com.raywenderlich.android.tflclassifier.classification.tflite.Classifier.create;
 
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
@@ -105,17 +107,14 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
               cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
 
               runOnUiThread(
-                  new Runnable() {
-                    @Override
-                    public void run() {
-                      showResultsInBottomSheet(results);
-                      showFrameInfo(previewWidth + "x" + previewHeight);
-                      showCropInfo(cropCopyBitmap.getWidth() + "x" + cropCopyBitmap.getHeight());
-                      showCameraResolution(canvas.getWidth() + "x" + canvas.getHeight());
-                      showRotationInfo(String.valueOf(sensorOrientation));
-                      showInference(lastProcessingTimeMs + "ms");
-                    }
-                  });
+                      () -> {
+                        showResultsInBottomSheet(results);
+                        showFrameInfo(previewWidth + "x" + previewHeight);
+                        showCropInfo(cropCopyBitmap.getWidth() + "x" + cropCopyBitmap.getHeight());
+                        showCameraResolution(canvas.getWidth() + "x" + canvas.getHeight());
+                        showRotationInfo(String.valueOf(sensorOrientation));
+                        showInference(lastProcessingTimeMs + "ms");
+                      });
             }
             readyForNextImage();
           }

@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.util.Size;
 
 import com.raywenderlich.android.tflclassifier.classification.env.Logger;
 
@@ -44,10 +45,17 @@ import java.util.PriorityQueue;
  * A classifier specialized to label images using TensorFlow Lite.
  */
 public abstract class Classifier {
-    public static final String MODEL_PATH = "exported_model.tflite";
+//        public static final String MODEL_PATH = "exported_model.tflite";
+    public static final String MODEL_PATH = "full_model_compressed.tflite";
     public static final String LABEL_PATH = "exported_labels.txt";
+//    public static final String MODEL_PATH = "mobile.tflite";
+//    public static final String LABEL_PATH = "mobile.txt";
 
     private static final Logger LOGGER = new Logger();
+
+    public static int availableProcessors() {
+        return Runtime.getRuntime().availableProcessors();
+    }
 
     /**
      * The model type used for classification.
@@ -273,6 +281,7 @@ public abstract class Classifier {
             return;
         }
         imgData.rewind();
+
         bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
         // Convert the image to floating point.
         int pixel = 0;
@@ -293,7 +302,6 @@ public abstract class Classifier {
     public List<Recognition> recognizeImage(final Bitmap bitmap) {
         // Log this method so that it can be analyzed with systrace.
         Trace.beginSection("recognizeImage");
-
         Trace.beginSection("preprocessBitmap");
         convertBitmapToByteBuffer(bitmap);
         Trace.endSection();
@@ -432,5 +440,9 @@ public abstract class Classifier {
      */
     protected int getNumLabels() {
         return labels.size();
+    }
+
+    public Size getSize() {
+        return new Size(getImageSizeX(), getImageSizeY());
     }
 }
