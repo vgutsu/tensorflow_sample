@@ -1,0 +1,9 @@
+cappella_s_sebastiano
+papa_leone
+pieta
+porta_santa
+altare_di_s_gerolamo
+matilde_di_canossa
+cappella_gregoriana
+statua_bronzo_di_san_pietro 
+unknown
